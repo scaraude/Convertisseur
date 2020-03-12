@@ -55,7 +55,7 @@ def GetBalise(ligne):
         return "backup"
     elif ligne.find("<forward>") != -1:
         return "forward"
-    elif ligne.find("<rest/>") != -1:
+    elif ligne.find("<rest/>") != -1 or ligne.find("<rest>") != -1:
         return "rest"
     elif ligne.find("tied") != -1:  # !!! CHECKER i ya d'autre balise qui contiennent "tied"
         return "tied"
@@ -71,7 +71,7 @@ def GetBalise(ligne):
         return "none"
 
 
-def ExploitBalise(ligne, balise):
+def ExploitBalise(ligne, balise):  # EXTRAIT LES DONNEES DE LA BALISE
     if balise == "step":
         lNote = ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))]  # extrait la lettre entre > et <
         return lNote
@@ -199,6 +199,9 @@ if __name__ == "__main__":
             curseur, NumberOfLine, infoNote = GetNote(curseur, NumberOfLine)
             if infoNote != []:
                 stock.append(infoNote)
+            if len(infoNote) != 4: # sort les erreurs
+                print(NumberOfLine)
+                print(infoNote)
 
         if balise == "mesure":
             curseur = 0
