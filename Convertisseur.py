@@ -19,11 +19,12 @@ dicoSpe = { "!r" : 251, "!t" : 253, "!m" : 254, "erreur" : 255, "separateur" : 2
 
 # choppe le fichier a convertir
 def FileChoice():
-    chemin = "C:/Users/412877/Documents/Partition/"
+    #chemin = "C:/Users/412877/Documents/Partition/"
     dossierDeSave = "Embedded/"      #parce qu'on enregistre pas dans le meme dossier
     fichierInput = str()
     suffixeXml = ".musicxml"
     suffixeFile = ".txt"
+    chemin = "../"
 
     print("fichier à convertir ?", "\n")
     fichierInput = input()
@@ -53,6 +54,8 @@ def GetBalise(ligne):
         return "/note"
     elif ligne.find("<backup>") != -1:
         return "backup"
+    elif ligne.find("slash") != -1:
+        return "slash"
     elif ligne.find("<forward>") != -1:
         return "forward"
     elif ligne.find("<rest/>") != -1 or ligne.find("<rest>") != -1:
@@ -116,6 +119,7 @@ def GetNote(curseur, NumeroLigne):
     chord = False
     note = ""
     tieded = False
+    slashed = False
 
     ligne = f.readline()
     balise = GetBalise(ligne)
@@ -125,9 +129,12 @@ def GetNote(curseur, NumeroLigne):
 
     # print("ligne : ", NumeroLigne - 1)
 
-    while balise != "/note":
+    while balise != "/note":            
         if balise == "rest":
             infoNote.insert(0, dicoSpe["!r"])
+            
+        if balise == "slash":
+            slashed = True
 
         if balise == "chord":
             chord = True
@@ -148,7 +155,10 @@ def GetNote(curseur, NumeroLigne):
             alter = ExploitBalise(ligne, balise)
 
         if balise == "staff":
-            infoNote.insert(3, ExploitBalise(ligne, balise))
+            if alter != 0 :
+                infoNote.insert(3, (ExploitBalise(ligne, balise) + 2))
+            else :
+                infoNote.insert(3, ExploitBalise(ligne, balise))
 
         if balise == "tied":
             if ExploitBalise(ligne, balise) == "stop":
@@ -163,13 +173,23 @@ def GetNote(curseur, NumeroLigne):
         NumeroLigne += 1
 
     if note != "":
-        infoNote.insert(0, dicoNote[note])
+        print("après la balise staff")
+        if alter != 0 :
+            infoNote.insert(0, dicoNote[note] + (2*alter))
+            alter = 0
+            print("----------------------------------")
+        else :
+            infoNote.insert(0, dicoNote[note])
 
     if chord:
         infoNote[1] = stock[len(stock) - 1][1]
 
     if tieded:
         infoNote = []
+    
+    if slashed:
+        infoNote.insert(2, 1)
+        slashed = False
 
     return curseur, NumeroLigne, infoNote
 
@@ -227,6 +247,7 @@ if __name__ == "__main__":
 
     f.close()
 
+    os.system("pause")
     print(stock)
 
     nbItem = 0
@@ -248,7 +269,6 @@ if __name__ == "__main__":
                 sizeItem += stock[i][j].__sizeof__()
                 j += 1
             nbItem += j
-            f.write(bytes(dicoSpe["separateur"])) #Séparateur de note (byte 250 pour délimiter chaque note)
             nbBytes+=1
             i += 1
 
@@ -261,3 +281,4 @@ if __name__ == "__main__":
     print("taille de tous les elements : " + str(sizeItem)) # en bytes
 
     f.close()
+    
