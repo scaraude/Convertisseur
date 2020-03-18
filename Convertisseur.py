@@ -163,7 +163,7 @@ def GetNote(curseur, NumeroLigne):
         if balise == "tied":
             if ExploitBalise(ligne, balise) == "stop":
                 i = len(stock) - 1
-                while stock[i][0] != dicoNote[note]:
+                while stock[i][0] != dicoNote[note] + (2 *alter):
                     i -= 1
                 stock[i][2] += duree
                 tieded = True
@@ -173,11 +173,9 @@ def GetNote(curseur, NumeroLigne):
         NumeroLigne += 1
 
     if note != "":
-        print("après la balise staff")
         if alter != 0 :
             infoNote.insert(0, dicoNote[note] + (2*alter))
             alter = 0
-            print("----------------------------------")
         else :
             infoNote.insert(0, dicoNote[note])
 
@@ -247,7 +245,6 @@ if __name__ == "__main__":
 
     f.close()
 
-    os.system("pause")
     print(stock)
 
     nbItem = 0
@@ -281,4 +278,5 @@ if __name__ == "__main__":
     print("taille de tous les elements : " + str(sizeItem)) # en bytes
 
     f.close()
-    
+
+    os.system("pause")
