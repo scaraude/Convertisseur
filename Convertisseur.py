@@ -20,17 +20,17 @@ dicoSpe = { "!r" : 251, "!t" : 253, "!m" : 254, "erreur" : 255, "separateur" : 2
 # choppe le fichier a convertir
 def FileChoice():
     #chemin = "C:/Users/412877/Documents/Partition/"
-    dossierDeSave = "Embedded/"      #parce qu'on enregistre pas dans le meme dossier
+    dossierDeSave = "../Embedded/"      #parce qu'on enregistre pas dans le meme dossier
     fichierInput = str()
     suffixeXml = ".musicxml"
     suffixeFile = ".txt"
-    chemin = "../"
+    chemin = "../Example/"
 
     print("fichier à convertir ?", "\n")
     fichierInput = input()
 
     fileRead = chemin + fichierInput + suffixeXml
-    fileWrite = chemin + dossierDeSave + fichierInput + suffixeFile
+    fileWrite = dossierDeSave + fichierInput + suffixeFile
 
     return fileRead, fileWrite
 
