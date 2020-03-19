@@ -36,7 +36,7 @@ def FileChoice():
 
 
 def GetBalise(ligne):
-    if ligne.find("tempo") != -1:  # !!! CHECKER i ya d'autre balise qui contiennent "tempo"
+    if ligne.find("sound tempo") != -1:  # !!! CHECKER i ya d'autre balise qui contiennent "tempo"
         return "tempo"
     elif ligne.find("<alter>") != -1:
         return "alter"
@@ -92,8 +92,7 @@ def ExploitBalise(ligne, balise):  # EXTRAIT LES DONNEES DE LA BALISE
         return duration
 
     if balise == "tempo":
-        tempo = int(
-            ligne[ligne.find("\"") + 1: ligne.find("\"", ligne.find("\"") + 1)])  # extrait la lettre entre " et "
+        tempo = int(ligne[ligne.find("\"") + 1: ligne.find("\"", ligne.find("\"") + 1)])  # extrait la lettre entre " et "
         return tempo
 
     if balise == "staff":
@@ -129,7 +128,7 @@ def GetNote(curseur, NumeroLigne):
 
     # print("ligne : ", NumeroLigne - 1)
 
-    while balise != "/note":            
+    while balise != "/note":
         if balise == "rest":
             infoNote.insert(0, dicoSpe["!r"])
             
@@ -197,7 +196,7 @@ if __name__ == "__main__":
     while True:
         try:
             fileRead, fileWrite = FileChoice()
-            f = open(fileRead, "r")
+            f = open(fileRead, encoding="utf8")
             break
         except :
             print("this file is not available...")
