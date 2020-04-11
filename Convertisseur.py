@@ -15,22 +15,22 @@ dicoNote = {"C2": 1, "D2": 5, "E2": 9, "F2": 11, "G2": 15, "A2": 19, "B2": 22,
             "C5": 71, "D5": 75, "E5": 79, "F5": 81, "G5": 85, "A5": 89, "B5": 93,
             "C6": 95, "D6": 98, "E6": 102, "F6": 105, "G6": 108, "A6": 112, "B6": 116,
             "C7": 119}
-dicoSpe = { "!r" : 251, "!t" : 253, "!m" : 254, "erreur" : 255, "separateur" : 250} #252 pris pour le tempo
+dicoSpe = { "!r" : 251, "!t" : 253, "!m" : 254, "erreur" : 255, "time" : 250} #252 pris pour le tempo
 
 # choppe le fichier a convertir
 def FileChoice():
     #chemin = "C:/Users/412877/Documents/Partition/"
-    dossierDeSave = "../Embedded/"      #parce qu'on enregistre pas dans le meme dossier
+    #chemin = "../Example/"
+    #dossierDeSave = "../Embedded/"      #parce qu'on enregistre pas dans le meme dossier
     fichierInput = str()
     suffixeXml = ".musicxml"
     suffixeFile = ".txt"
-    chemin = "../Example/"
 
     print("fichier à convertir ?", "\n")
     fichierInput = input()
 
-    fileRead = chemin + fichierInput + suffixeXml
-    fileWrite = dossierDeSave + fichierInput + suffixeFile
+    fileRead = fichierInput + suffixeXml #chemin + fichierInput + suffixeXml
+    fileWrite = fichierInput + suffixeFile #dossierDeSave + fichierInput + suffixeFile
 
     return fileRead, fileWrite
 
@@ -38,6 +38,16 @@ def FileChoice():
 def GetBalise(ligne):
     if ligne.find("sound tempo") != -1:  # !!! CHECKER i ya d'autre balise qui contiennent "tempo"
         return "tempo"
+    elif ligne.find("<divisions>") != -1:
+        return "divisions"
+    elif ligne.find("<time") != -1:
+        return "time"
+    elif ligne.find("</time>") != -1:
+        return "/time"
+    elif ligne.find("<beats>") != -1:
+        return "beats"
+    elif ligne.find("<beat-type>") != -1:
+        return "beat_type"
     elif ligne.find("<alter>") != -1:
         return "alter"
     elif ligne.find("<note") != -1:
@@ -75,6 +85,18 @@ def GetBalise(ligne):
 
 
 def ExploitBalise(ligne, balise):  # EXTRAIT LES DONNEES DE LA BALISE
+    if balise == "divisions":
+        divisions = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait le chiffre entre > et <
+        return divisions
+
+    if balise == "beats":
+        beats = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait le chiffre entre > et <
+        return beats
+
+    if balise == "beat_type":
+        beat_type = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait le chiffre entre > et <
+        return beat_type
+
     if balise == "step":
         lNote = ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))]  # extrait la lettre entre > et <
         return lNote
@@ -88,15 +110,15 @@ def ExploitBalise(ligne, balise):  # EXTRAIT LES DONNEES DE LA BALISE
         return alter
 
     if balise == "duration":
-        duration = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait la durée entre > et <
+        duration = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait le nombre entre > et <
         return duration
 
     if balise == "tempo":
-        tempo = int(ligne[ligne.find("\"") + 1: ligne.find("\"", ligne.find("\"") + 1)])  # extrait la lettre entre " et "
+        tempo = round(float(ligne[ligne.find("\"") + 1: ligne.find("\"", ligne.find("\"") + 1)]))  # extrait le nombre entre " et "
         return tempo
 
     if balise == "staff":
-        staff = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait la lettre entre > et <
+        staff = int(ligne[ligne.find(">") + 1: ligne.find("<", ligne.find(">"))])  # extrait le chiffre entre > et <
         return staff
 
     if balise == "mesure":
@@ -205,12 +227,32 @@ if __name__ == "__main__":
     stock = []
     curseur = 0
     mesure = 0
+    divisions = 1
 
     NumberOfLine = 0
 
     for line in f:
         NumberOfLine += 1
         balise = GetBalise(line)
+
+        if balise == "divisions":
+            divisions = ExploitBalise(line, balise)
+            stock.insert(0, [divisions])            #Crée un élément de len = 1 pour être compatible avec l'écriture du fichier (en bas)
+
+        if balise == "time":
+            beats = 1
+            beat_type = 1
+            while(balise != "/time"):
+                line = f.readline()
+                NumberOfLine += 1
+                balise = GetBalise(line)
+                if balise == "beats":
+                    beats = ExploitBalise(line, balise)
+                if balise == "beat_type":
+                    beat_type = ExploitBalise(line, balise)
+            time = beats*divisions*4/beat_type
+            stock.append([dicoSpe["time"], int(time)])
+            print(stock[-1])
 
         if balise == "note":
             curseur, NumberOfLine, infoNote = GetNote(curseur, NumberOfLine)
